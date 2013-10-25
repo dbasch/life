@@ -18,7 +18,8 @@
     </canvas>
     <script type="text/javascript" src="js/life.js"></script>
     <script>
-      life.init(20, 20, 1);
+      var start = function() { life.init(20, 20, 1);};
+      window.onload = start;
     </script>
     <p/>
     source code: <a href="https://github.com/dbasch/life">github.com/dbasch/life</a>
