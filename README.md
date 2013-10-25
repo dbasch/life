@@ -2,7 +2,7 @@
 
 Conway's Game of Life implemented in ClojureScript as a learning exercise.
 
-Check it out here: [http://diegobasch.com/life/](diegobasch.com/life)
+See it in action: [diegobasch.com/life/](http://diegobasch.com/life)
 
 ## License
 
