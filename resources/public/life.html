@@ -1,0 +1,19 @@
+
+<html>
+  <head>
+    <title>Conway's Game of Life</title>
+  </head>
+  <body>
+    <h1>Conway's Game of Life</h1>
+    <button id="start">Run game</button>
+    <button id="reset">Reset</button>
+    Generations: <span id="gens">0</span><p/>
+    <canvas id="surface" width="500" height="500">
+      Your browser does not support HTML5 Canvas.
+    </canvas>
+    <script type="text/javascript" src="js/life.js"></script>
+    <script>
+      life.init(20, 20, 1);
+    </script>
+  </body>
+</html>
