@@ -1,4 +1,5 @@
-(ns life-engine)
+(ns life.engine)
+
 ;; calculates the next generation board
 ;; for the standard game of life rules
 (defn next-iteration [board]

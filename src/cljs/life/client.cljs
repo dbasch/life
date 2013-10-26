@@ -1,9 +1,13 @@
-(ns life
-  (:require [goog.dom :as dom]
+(ns life.client
+  (:require [clojure.string :as string]
+            [goog.dom :as dom]
             [goog.events :as events]
             [goog.events.EventType :as event-type]
-            [life-engine :as le]
+            [life.engine :as le]
             [clojure.browser.repl :as repl]))
+
+(defn log [msg]
+  (.log js/console msg))
 
 ;; for debugging
 (defn nrepl []
@@ -13,18 +17,25 @@
       nrepl)
 
 ;; canvas drawing functions
+(defn color [red green blue]
+  (str "rgb(" (string/join "," [red green blue]) ")"))
+
+(def white (color 255 255 255))
+(def gray  (color 169 169 169))
+(def black (color 0   0   0))
+
 (defn surface []
   (let [surface (dom/getElement "surface")]
     [(.getContext surface "2d")
      (. surface -width)
      (. surface -height)]))
 
-(defn fill-rect [[surface] [x y width height] [r g b]]
-  (set! (. surface -fillStyle) (str "rgb(" r "," g "," b ")"))
+(defn fill-rect [[surface] [x y width height] fill-color]
+  (set! (. surface -fillStyle) fill-color)
   (.fillRect surface x y width height))
 
-(defn stroke-rect [[surface] [x y width height] line-width [r g b]]
-  (set! (. surface -strokeStyle) (str "rgb(" r "," g "," b ")"))
+(defn stroke-rect [[surface] [x y width height] line-width stroke-color]
+  (set! (. surface -strokeStyle) stroke-color)
   (set! (. surface -lineWidth) line-width)
   (.strokeRect surface x y width height))
 
@@ -33,8 +44,8 @@
         board (:board state)
         gen (:generation state)
         el (dom/getElement "gens")]
-    (fill-rect surface [0 0 width height] [255 255 255])
-    (stroke-rect surface [0 0 width height] 2 [0 0 0])
+    (fill-rect surface [0 0 width height] white)
+    (stroke-rect surface [0 0 width height] 2 black)
     (set! (.-innerHTML el) gen)
     (doseq [x (range (count board))]
       (doseq [y (range (count (first board)))]
@@ -43,8 +54,8 @@
               x-offset (* cell-width x)
               y-offset (* cell-width y)
               alive (nth (nth board x) y)]
-          (if alive (fill-rect surface [x-offset y-offset cell-width cell-height] [0 0 0]))
-          (stroke-rect surface [x-offset y-offset cell-width cell-height] 2 [169 169 169]))))))
+          (if alive (fill-rect surface [x-offset y-offset cell-width cell-height] black))
+          (stroke-rect surface [x-offset y-offset cell-width cell-height] 2 gray))))))
 
 (defn game [state surface]
   (swap! state (fn [s]
@@ -64,13 +75,15 @@
   (let [clicked (-> event .-target .-id)
         handle (:handle @state)]
     (cond (= clicked "start")
-          (if (nil? handle)
-            (let [new-handle (.setInterval js/window #(game state surface) 50)]
-              (swap! state merge {:handle new-handle})
-              (set! (.-innerHTML (dom/getElement "start")) "Pause game"))
-            (do (.clearInterval js/window handle)
-                (set! (.-innerHTML (dom/getElement "start")) "Run game")
-                (swap! state merge {:handle nil})))
+          (do
+            (if (nil? handle)
+              (let [new-handle (.setInterval js/window #(game state surface) 250)]
+                (swap! state merge {:handle new-handle})
+                (set! (.-innerHTML (dom/getElement "start")) "Pause game"))
+              (do
+                 (.clearInterval js/window handle)
+                  (set! (.-innerHTML (dom/getElement "start")) "Run game")
+                  (swap! state merge {:handle nil}))))
           (= clicked "reset") (reset state surface))))
 
 (defn ^:export init [x y interval]
